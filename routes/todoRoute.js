@@ -39,6 +39,22 @@ router.get('/todos', async (req, res) => {
     }
 });
 
+// generate id field
+router.get('/todos/generateid', async (req, res) => {
+    try {
+        const todos = await Todo.find();
+        for (const todo of todos) {
+            todo.id = todo.index
+            console.log(todo)
+            await todo.save()
+        }
+        const response = await Todo.find()
+        res.json(todos);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 
 // Get a single todo by ID
 router.get('/todos/:id', async (req, res) => {
@@ -51,6 +67,45 @@ router.get('/todos/:id', async (req, res) => {
     }
 });
 
+// Update index
+router.put('/todos', async (req, res) => {
+    try {
+        // activeId, activeIndex, overId, overIndex
+        const activeTodo = await Todo.findByIdAndUpdate(
+            req.body.activeId,
+            { id: req.body.overIndex },
+            { new: true }
+        );
+        const overTodo = await Todo.findByIdAndUpdate(
+            req.body.overId,
+            { id: req.body.activeIndex },
+            { new: true }
+        );
+        if (!activeTodo && !overTodo) return res.status(404).json({ message: 'Todo not found' });
+        res.json({ activeTodo, overTodo });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// Update Todo Order
+router.put('/todos/updateOrder', async (req, res) => {
+    try {
+        const order = [...req.body.order]
+        if (!order && !order.length > 0) {
+            res.status(404).json({ message: "order cannot be blank!" })
+        }
+        for (var i = 0; i < order.length; i++) {
+            await Todo.findByIdAndUpdate(
+                order[i],
+                { id: i + 1 }
+            )
+        }
+        res.status(200).json({ order, message: "Order updated successfully!" });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
 
 // Update a todo by ID
 router.put('/todos/:id', async (req, res) => {

@@ -6,6 +6,14 @@ const todoSchema = new Schema({
         type: String,
         required: true
     },
+    index: {
+        type: Number,
+        required: false
+    },
+    id: {
+        type: Number,
+        required: false
+    },
     duedate: {
         type: Date,
         required: false
@@ -33,9 +41,16 @@ todoSchema.pre('save', async function (next) {
     const parentModel = mongoose.model(todo.parentModel);
     const parent = await parentModel.findById(todo.parent).populate('todos');
 
-    if (parent.todos.some(existingTodo => existingTodo.taskname === todo.taskname)) {
+    if (parent.todos.some(existingTodo => {
+        if (existingTodo.taskname === todo.taskname && !existingTodo._id.equals(todo._id)) {
+            return true
+        }
+    })) {
         const error = new Error('Todo already exists!');
         return next(error);
+    }
+    if (this.isNew) {
+        todo.id = parent.todos.length + 1
     }
     next();
 })

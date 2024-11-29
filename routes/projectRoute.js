@@ -1,5 +1,6 @@
 const express = require('express')
 const Project = require('../model/Project')
+const Todo = require('../model/Todo')
 
 const router = express.Router()
 
@@ -37,6 +38,26 @@ router.get('/projects/:id', async (req, res) => {
     }
 })
 
+// Generate indexes for all todos
+router.put('/projects/generateindex', async (req, res) => {
+    try {
+        const projects = await Project.find()
+
+        for (const project of projects) {
+            if (project.todos.length > 0) {
+                var index = 1
+                for (const id of project.todos) {
+                    await Todo.findByIdAndUpdate(id, { index: index });
+                    index += 1;
+                }
+            }
+        };
+        res.status(200).json({ message: 'Success!' })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+})
+
 // Update project
 router.put('/projects/:id', async (req, res) => {
     try {
@@ -62,5 +83,6 @@ router.delete('/projects/:id', async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 })
+
 
 module.exports = router
