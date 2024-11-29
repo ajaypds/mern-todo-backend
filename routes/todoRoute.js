@@ -1,5 +1,6 @@
 const express = require('express')
 const Todo = require('../model/Todo')
+const mongoose = require('mongoose')
 const Project = require('../model/Project')
 
 const router = express.Router();
@@ -115,7 +116,18 @@ router.put('/todos/toggleComplete', async (req, res) => {
             { completed: req.body.completed },
             { new: true }
         );
-        if (!updatedTodo) return res.status(404).json({ message: 'Todo not found' })
+        if (!updatedTodo) {
+            return res.status(404).json({ message: 'Todo not found' })
+        }
+        const parentModel = mongoose.model(updatedTodo.parentModel)
+        const parent = await parentModel.findById(updatedTodo.parent)
+        if (updatedTodo.completed) {
+            await parent.completedTodos.push(updatedTodo._id)
+        } else {
+            parent.completedTodos = parent.completedTodos.filter(todoid => !todoid.equals(updatedTodo._id))
+        }
+        await parent.save()
+        // console.log(parent)
         res.status(200).json(updatedTodo)
     } catch (err) {
         res.status(400).json({ message: err.message })

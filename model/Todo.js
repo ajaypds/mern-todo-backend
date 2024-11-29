@@ -35,6 +35,10 @@ const todoSchema = new Schema({
     todos: [{
         type: Schema.Types.ObjectId,
         ref: 'Todo'
+    }],
+    completedTodos: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Todo'
     }]
 })
 

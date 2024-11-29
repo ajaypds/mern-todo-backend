@@ -21,6 +21,10 @@ router.post('/projects', async (req, res) => {
 router.get('/projects', async (req, res) => {
     try {
         const projects = await Project.find();
+        projects.forEach(project => {
+            project.completedTasks = project.completedTodos.length;
+            project.incompleteTasks = project.todos.length - project.completedTodos.length;
+        });
         res.json(projects)
     } catch (error) {
         res.status(500).json({ message: error.message })
@@ -30,7 +34,7 @@ router.get('/projects', async (req, res) => {
 // Get project by id
 router.get('/projects/:id', async (req, res) => {
     try {
-        const project = await Project.findById(req.params.id).populate('todos');
+        const project = await Project.findById(req.params.id).populate('todos').exec();
         if (!project) return res.status(404).json({ message: 'Project not found' })
         res.status(200).json(project)
     } catch (error) {
