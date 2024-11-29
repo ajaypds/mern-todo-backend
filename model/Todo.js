@@ -28,6 +28,10 @@ const todoSchema = new Schema({
         required: true,
         enum: ['Project', 'Todo']
     },
+    completed: {
+        type: Boolean,
+        required: false
+    },
     todos: [{
         type: Schema.Types.ObjectId,
         ref: 'Todo'

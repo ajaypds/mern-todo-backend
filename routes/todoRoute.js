@@ -39,7 +39,7 @@ router.get('/todos', async (req, res) => {
     }
 });
 
-// generate id field
+// generate id field (copy id from index field. This should be called after generating index)
 router.get('/todos/generateid', async (req, res) => {
     try {
         const todos = await Todo.find();
@@ -68,25 +68,25 @@ router.get('/todos/:id', async (req, res) => {
 });
 
 // Update index
-router.put('/todos', async (req, res) => {
-    try {
-        // activeId, activeIndex, overId, overIndex
-        const activeTodo = await Todo.findByIdAndUpdate(
-            req.body.activeId,
-            { id: req.body.overIndex },
-            { new: true }
-        );
-        const overTodo = await Todo.findByIdAndUpdate(
-            req.body.overId,
-            { id: req.body.activeIndex },
-            { new: true }
-        );
-        if (!activeTodo && !overTodo) return res.status(404).json({ message: 'Todo not found' });
-        res.json({ activeTodo, overTodo });
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
-});
+// router.put('/todos', async (req, res) => {
+//     try {
+//         // activeId, activeIndex, overId, overIndex
+//         const activeTodo = await Todo.findByIdAndUpdate(
+//             req.body.activeId,
+//             { id: req.body.overIndex },
+//             { new: true }
+//         );
+//         const overTodo = await Todo.findByIdAndUpdate(
+//             req.body.overId,
+//             { id: req.body.activeIndex },
+//             { new: true }
+//         );
+//         if (!activeTodo && !overTodo) return res.status(404).json({ message: 'Todo not found' });
+//         res.json({ activeTodo, overTodo });
+//     } catch (err) {
+//         res.status(400).json({ message: err.message });
+//     }
+// });
 
 // Update Todo Order
 router.put('/todos/updateOrder', async (req, res) => {
@@ -106,6 +106,21 @@ router.put('/todos/updateOrder', async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 });
+
+// Mark todo as completed or not-completed
+router.put('/todos/toggleComplete', async (req, res) => {
+    try {
+        const updatedTodo = await Todo.findByIdAndUpdate(
+            req.body.id,
+            { completed: req.body.completed },
+            { new: true }
+        );
+        if (!updatedTodo) return res.status(404).json({ message: 'Todo not found' })
+        res.status(200).json(updatedTodo)
+    } catch (err) {
+        res.status(400).json({ message: err.message })
+    }
+})
 
 // Update a todo by ID
 router.put('/todos/:id', async (req, res) => {
