@@ -21,7 +21,7 @@ const projectSchema = new Schema({
 })
 
 projectSchema.virtual('completedTasks').get(function () {
-    console.log(`completed todos: ${this.completedTodos}`)
+    // console.log(`completed todos count: ${this.completedTodos}`)
     return this.completedTodos.length
 })
 
